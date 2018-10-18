@@ -84,7 +84,19 @@ namespace pingcap
       template <typename T>
       inline int TaskQueue<T>::length()
       {
-          return queue_.size();
+          int ret = -1;
+          while (!stop_)
+          {
+              cond_.lock();
+              if (stop_)
+              {
+                  cond_.unlock();
+                  break;
+              }
+              ret = queue_.size();
+              cond_.unlock();
+          }
+          return ret;
       }
       
       template <typename T>
